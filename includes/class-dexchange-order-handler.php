@@ -21,6 +21,7 @@ class Dexchange_Order_Handler {
             return false;
         }
 
+        // Use HPOS compatible methods
         $order->update_meta_data('_dexchange_transaction_id', $webhook_data['transaction_id']);
         $order->update_meta_data('_dexchange_payment_status', $webhook_data['status']);
 

@@ -9,6 +9,7 @@
  * Text Domain: dexchange-payment-gateway
  * WC requires at least: 3.0.0
  * WC tested up to: 8.0.0
+ * Requires PHP: 7.2
  *
  * @package DexchangePaymentGateway
  */
@@ -39,6 +40,17 @@ function dexchange_woocommerce_missing_notice() {
 </div>
 <?php
 }
+
+/**
+ * Declare HPOS compatibility
+ */
+function dexchange_declare_hpos_compatibility() {
+    if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('remote_logging', __FILE__, true);
+    }
+}
+add_action('before_woocommerce_init', 'dexchange_declare_hpos_compatibility');
 
 /**
  * Initialize the gateway
