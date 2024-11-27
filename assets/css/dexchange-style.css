@@ -1,0 +1,17 @@
+.dexchange-banner {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.dexchange-banner img {
+    max-width: 100%;
+    height: auto;
+}
+
+.dexchange-logo {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+    max-height: 32px;
+    width: auto;
+}
