@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
  * Check if WooCommerce is active
  */
 function dexchange_check_woocommerce() {
-    if (!function_exists('WC')) {
+    if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
         add_action('admin_notices', 'dexchange_woocommerce_missing_notice');
         return false;
     }
@@ -44,7 +44,7 @@ function dexchange_woocommerce_missing_notice() {
  * Initialize the gateway
  */
 function init_dexchange_gateway() {
-    if (!dexchange_check_woocommerce()) {
+    if (!class_exists('WC_Payment_Gateway')) {
         return;
     }
 
@@ -55,21 +55,26 @@ function init_dexchange_gateway() {
     require_once plugin_dir_path(__FILE__) . 'includes/class-dexchange-gateway.php';
 
     // Add the gateway to WooCommerce
-    add_filter('woocommerce_payment_gateways', function($methods) {
+    function add_dexchange_gateway($methods) {
         $methods[] = 'Dexchange_Gateway';
         return $methods;
-    });
+    }
+    add_filter('woocommerce_payment_gateways', 'add_dexchange_gateway');
 
     // Enqueue styles
-    wp_enqueue_style('dexchange-style', plugins_url('assets/css/dexchange-style.css', __FILE__));
+    function dexchange_enqueue_styles() {
+        if (is_checkout()) {
+            wp_enqueue_style('dexchange-style', plugins_url('assets/css/dexchange-style.css', __FILE__));
+        }
+    }
+    add_action('wp_enqueue_scripts', 'dexchange_enqueue_styles');
 }
-add_action('plugins_loaded', 'init_dexchange_gateway', 11);
+add_action('plugins_loaded', 'init_dexchange_gateway', 0);
 
 /**
  * Create necessary directories on plugin activation
  */
 function dexchange_plugin_activation() {
-    // Check if WooCommerce is active
     if (!dexchange_check_woocommerce()) {
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die(__('Veuillez installer et activer WooCommerce avant d\'activer DEXCHANGE Payment Gateway.', 'dexchange-payment-gateway'));

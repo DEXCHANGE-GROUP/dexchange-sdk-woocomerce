@@ -14,9 +14,10 @@ class Dexchange_Gateway extends WC_Payment_Gateway {
 
     public function __construct() {
         $this->id = 'dexchange';
+        $this->icon = plugins_url('../assets/images/dexchange-logo.png', __FILE__);
+        $this->has_fields = false;
         $this->method_title = 'Passerelle de Paiement DEXCHANGE';
         $this->method_description = 'Acceptez les paiements via DEXCHANGE';
-        $this->has_fields = true;
         $this->supports = array('products');
 
         // Load the form fields
@@ -28,12 +29,10 @@ class Dexchange_Gateway extends WC_Payment_Gateway {
         $this->description = $this->get_option('description');
         $this->enabled = $this->get_option('enabled');
         $this->api_key = $this->get_option('api_key');
-
-        // Load the settings
-        $this->icon = plugins_url('assets/images/dexchange-logo.png', dirname(__FILE__));
         
         $this->api = new Dexchange_API($this->api_key);
 
+        // Hooks
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         add_action('woocommerce_api_dexchange_gateway', array($this, 'handle_webhook'));
         add_action('woocommerce_receipt_' . $this->id, array($this, 'receipt_page'));
@@ -46,7 +45,7 @@ class Dexchange_Gateway extends WC_Payment_Gateway {
                 'title' => 'Activer/Désactiver',
                 'type' => 'checkbox',
                 'label' => 'Activer le paiement DEXCHANGE',
-                'default' => 'no'
+                'default' => 'yes'
             ),
             'title' => array(
                 'title' => 'Titre',
@@ -65,6 +64,7 @@ class Dexchange_Gateway extends WC_Payment_Gateway {
                 'title' => 'Clé API',
                 'type' => 'password',
                 'description' => 'Entrez votre clé API DEXCHANGE',
+                'required' => true
             )
         );
     }
@@ -72,18 +72,16 @@ class Dexchange_Gateway extends WC_Payment_Gateway {
     public function display_dexchange_banner() {
         if ($this->is_available()) {
             echo '<div class="dexchange-banner">
-                    <img src="' . esc_url(plugins_url('assets/images/dexchange-banner.png', dirname(__FILE__))) . '" 
-                         alt="DEXCHANGE Payment" 
-                         style="max-width: 100%; height: auto; margin: 20px 0;">
+                    <img src="' . esc_url(plugins_url('../assets/images/dexchange-banner.png', __FILE__)) . '" 
+                         alt="DEXCHANGE Payment" />
                   </div>';
         }
     }
 
     public function receipt_page($order_id) {
         echo '<div class="dexchange-banner">
-                <img src="' . esc_url(plugins_url('assets/images/dexchange-banner.png', dirname(__FILE__))) . '" 
-                     alt="DEXCHANGE Payment" 
-                     style="max-width: 100%; height: auto; margin: 20px 0;">
+                <img src="' . esc_url(plugins_url('../assets/images/dexchange-banner.png', __FILE__)) . '" 
+                     alt="DEXCHANGE Payment" />
               </div>';
     }
 
@@ -128,5 +126,9 @@ class Dexchange_Gateway extends WC_Payment_Gateway {
     public function handle_webhook() {
         $webhook_handler = new Dexchange_Webhook_Handler();
         $webhook_handler->handle_webhook();
+    }
+
+    public function is_available() {
+        return parent::is_available() && !empty($this->api_key);
     }
 }
